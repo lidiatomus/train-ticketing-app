@@ -21,6 +21,7 @@ public class AdminService {
     private final BookingService bookingService;
     private final EmailService emailService;
     private final GeoCodingService geoCodingService;
+    private final BookingRepository bookingRepository;
 
     public Train addTrain(Train train) {
         if (train.getTrainNumber() == null || train.getTrainNumber().isBlank()) {
@@ -69,7 +70,25 @@ public class AdminService {
     }
 
     public void deleteTrain(Long id) {
-        trainRepository.deleteById(id);
+        Train train = trainRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Train not found"));
+
+        List<Route> routes = routeRepository.findAll()
+                .stream()
+                .filter(route -> route.getTrain().getId().equals(id))
+                .toList();
+
+        for (Route route : routes) {
+            List<RouteStop> routeStops =
+                    routeStopRepository.findByRouteIdOrderByStopOrder(route.getId());
+
+            routeStopRepository.deleteAll(routeStops);
+            routeRepository.delete(route);
+        }
+
+        bookingRepository.deleteByTrainId(id);
+
+        trainRepository.delete(train);
     }
 
     public Train setDelay(Long trainId, int delayMinutes) {
@@ -135,8 +154,42 @@ public class AdminService {
         return stationRepository.save(station);
     }
 
-    public void deleteStation(Long id) {
-        stationRepository.deleteById(id);
+    public void deleteStation(Long stationId) {
+        Station station = stationRepository.findById(stationId)
+                .orElseThrow(() -> new RuntimeException("Station not found"));
+
+        List<RouteStop> stationStops =
+                routeStopRepository.findByStationId(stationId);
+
+        for (RouteStop stop : stationStops) {
+            Long routeId = stop.getRoute().getId();
+
+            List<RouteStop> routeStops =
+                    routeStopRepository.findByRouteIdOrderByStopOrder(routeId);
+
+            if (routeStops.size() <= 2) {
+                routeStopRepository.deleteAll(routeStops);
+                routeRepository.deleteById(routeId);
+            } else {
+                routeStopRepository.delete(stop);
+
+                List<RouteStop> remainingStops =
+                        routeStopRepository.findByRouteIdOrderByStopOrder(routeId);
+
+                int order = 1;
+
+                for (RouteStop remaining : remainingStops) {
+                    if (remaining.getStopOrder() == 100) {
+                        continue;
+                    }
+
+                    remaining.setStopOrder(order++);
+                    routeStopRepository.save(remaining);
+                }
+            }
+        }
+
+        stationRepository.delete(station);
     }
 
     public Route addRoute(RouteRequest request) {
@@ -207,9 +260,13 @@ public class AdminService {
     }
 
     public void deleteRoute(Long id) {
+        Route route = routeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Route not found"));
+
         List<RouteStop> routeStops = routeStopRepository.findByRouteIdOrderByStopOrder(id);
         routeStopRepository.deleteAll(routeStops);
-        routeRepository.deleteById(id);
+
+        routeRepository.delete(route);
     }
 
     public RouteStop addRouteStop(RouteStopRequest request) {

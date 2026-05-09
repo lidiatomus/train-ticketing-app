@@ -86,7 +86,6 @@ public class DataInitializer implements CommandLineRunner {
                         .build()
         );
 
-        // Route 1: good direct route Cluj -> Bucharest
         Route route1 = routeRepository.save(
                 Route.builder()
                         .routeName("Cluj - Bucharest")
@@ -99,7 +98,6 @@ public class DataInitializer implements CommandLineRunner {
         saveStop(route1, brasov, 3, 14, 0, 14, 10);
         saveStop(route1, bucharest, 100, 17, 0, 17, 0);
 
-        // Route 2: western route Cluj -> Timisoara
         Route route2 = routeRepository.save(
                 Route.builder()
                         .routeName("Cluj - Timisoara")
@@ -112,9 +110,6 @@ public class DataInitializer implements CommandLineRunner {
         saveStop(route2, arad, 3, 14, 0, 14, 10);
         saveStop(route2, timisoara, 100, 16, 0, 16, 0);
 
-        // Route 3: changeover route Bucharest -> Constanta
-        // Example search Cluj -> Constanta should find:
-        // Cluj -> Bucharest using IR100, then Bucharest -> Constanta using IR300
         Route route3 = routeRepository.save(
                 Route.builder()
                         .routeName("Bucharest - Constanta")

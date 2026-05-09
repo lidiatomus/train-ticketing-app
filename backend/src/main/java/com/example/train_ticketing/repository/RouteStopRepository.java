@@ -7,4 +7,7 @@ import java.util.List;
 
 public interface RouteStopRepository extends JpaRepository<RouteStop, Long> {
     List<RouteStop> findByRouteIdOrderByStopOrder(Long routeId);
+    List<RouteStop> findByStationId(Long stationId);
+    List<RouteStop> findByRouteId(Long routeId);
+
 }
