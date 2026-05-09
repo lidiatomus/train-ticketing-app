@@ -96,11 +96,20 @@ function AdminPage() {
         e.preventDefault()
         clearMessages()
 
+        const capacity = parseInt(trainForm.capacity)
+        const delayMinutes = parseInt(trainForm.delayMinutes)
+
+        if (!trainForm.trainNumber || isNaN(capacity) || capacity <= 0 || isNaN(delayMinutes) || delayMinutes < 0) {
+            setErrorMessage("Please enter valid train data")
+            return
+        }
+
         try {
             await api.post("/admin/trains", {
                 trainNumber: trainForm.trainNumber,
-                capacity: parseInt(trainForm.capacity),
-                delayMinutes: parseInt(trainForm.delayMinutes)
+                capacity: capacity,
+                availableSeats: capacity,
+                delayMinutes: delayMinutes
             })
 
             resetTrainForm()
@@ -125,11 +134,20 @@ function AdminPage() {
         e.preventDefault()
         clearMessages()
 
+        const capacity = parseInt(trainForm.capacity)
+        const delayMinutes = parseInt(trainForm.delayMinutes)
+
+        if (!trainForm.trainNumber || isNaN(capacity) || capacity <= 0 || isNaN(delayMinutes) || delayMinutes < 0) {
+            setErrorMessage("Please enter valid train data")
+            return
+        }
+
         try {
             await api.put(`/admin/trains/${editingTrainId}`, {
                 trainNumber: trainForm.trainNumber,
-                capacity: parseInt(trainForm.capacity),
-                delayMinutes: parseInt(trainForm.delayMinutes)
+                capacity: capacity,
+                availableSeats: capacity,
+                delayMinutes: delayMinutes
             })
 
             resetTrainForm()
@@ -379,14 +397,24 @@ function AdminPage() {
         clearMessages()
 
         const delay = prompt("Enter delay minutes")
-        if (!delay) return
+
+        if (delay === null || delay.trim() === "") {
+            return
+        }
+
+        const delayNumber = parseInt(delay)
+
+        if (isNaN(delayNumber) || delayNumber < 0) {
+            setErrorMessage("Delay must be a valid positive number")
+            return
+        }
 
         try {
             await api.post(`/admin/trains/${trainId}/delay`, {
-                delayMinutes: parseInt(delay)
+                delayMinutes: delayNumber
             })
 
-            setSuccessMessage("Delay updated successfully")
+            setSuccessMessage("Delay updated successfully. Notification emails sent.")
             fetchData()
         } catch (err) {
             setErrorMessage(getErrorMessage(err))
