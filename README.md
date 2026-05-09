@@ -428,3 +428,43 @@ The project demonstrates a complete full-stack train ticketing system with:
 * validation and business logic.
 
 The application satisfies all requested assignment requirements.
+
+# Optional Problem: Smart Route Recommendation
+
+## Problem
+
+The basic route search feature can find possible routes between two stations, but it does not decide which route is the best one.
+
+The optional problem is to recommend the best train route between two stations by considering:
+- total travel time;
+- train delays;
+- possible intermediate stations.
+
+## Solution
+
+I modelled the railway network as a weighted graph:
+- each station is a node;
+- each train connection is an edge;
+- each edge has a cost equal to travel time plus delay.
+
+To find the best route, I used Dijkstra’s algorithm. This algorithm finds the path with the minimum total cost between two stations.
+
+## Programmatic Implementation
+
+The implementation is placed in:
+
+src/main/java/com/example/train_ticketing/optional/SmartRouteRecommendation.java
+
+Example input:
+
+Cluj -> Sibiu, 180 minutes, 5 minutes delay  
+Sibiu -> Brasov, 120 minutes, 0 minutes delay  
+Brasov -> Bucharest, 150 minutes, 10 minutes delay  
+Cluj -> Oradea, 160 minutes, 0 minutes delay  
+Oradea -> Bucharest, 500 minutes, 0 minutes delay  
+
+Example output:
+
+Best route: [Cluj, Sibiu, Brasov, Bucharest]
+
+This shows that the system chooses the route with the lowest total cost, not simply the route with the fewest stations.
